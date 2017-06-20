@@ -1,3 +1,6 @@
 rootProject.name = 'moneyne'
 
 include 'webserver'
+include 'moneyne-rule'
+include 'moneyne-workflow'
+
