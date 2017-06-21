@@ -1,0 +1,19 @@
+buildscript {
+    dependencies {
+        classpath "gradle.plugin.org.jruyi.gradle:thrift-gradle-plugin:0.4.0"
+    }
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    }
+}
+
+apply plugin: "org.jruyi.thrift"
+
+compileThrift {
+    sourceDir 'src/main/thrift'
+    outputDir 'src/main/java/thrift/generated'
+}
+
+dependencies {
+    compile group: 'org.apache.thrift', name: 'libthrift', version: '0.10.0'
+}
