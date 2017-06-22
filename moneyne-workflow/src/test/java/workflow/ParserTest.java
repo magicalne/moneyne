@@ -28,7 +28,7 @@ public class ParserTest {
             final String content = new String(bytes, StandardCharsets.UTF_8);
             System.out.println(content);
 
-            final Parser parser = Parboiled.createParser(Parser.class);
+            final PolicyParser parser = Parboiled.createParser(PolicyParser.class);
             ParsingResult<Policy> result = new TracingParseRunner<Policy>(parser.Policy("workflow")).run(content);
             String parseTreePrintOut = ParseTreeUtils.printNodeTree(result);
             System.out.println(parseTreePrintOut);
@@ -41,9 +41,5 @@ public class ParserTest {
             Assert.assertEquals(Mode.NORMAL, policy.getInitStep().getMode());
             Assert.assertEquals(2, policy.getSteps().size());
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        new ParserTest().parse();
     }
 }

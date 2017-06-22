@@ -9,17 +9,28 @@ import org.parboiled.support.Var;
  * Created by magiclane on 20/06/2017.
  */
 @BuildParseTree
-class Parser extends BaseParser<Object> {
+class PolicyParser extends BaseParser<Object> {
 
     Rule Policy(String policyId) {
         final Policy policy = new Policy();
         policy.setPolicyId(policyId);
         final Var<Policy> policyVar = new Var<>(policy);
         return Sequence(
+                Namespace(policyVar),
                 InitBlock(policyVar),
                 StepBlockList(policyVar),
                 EOI,
                 push(policyVar.get())
+        );
+    }
+
+    Rule Namespace(Var<Policy> policyVar) {
+        return Sequence(
+                String("namespace"),
+                OneOrMore(Whitespace()),
+                OneOrMore(TestNot(Spacing()), ANY),
+                policyVar.set(policyVar.get().setNamespace(match())),
+                OneOrMore(NewLine())
         );
     }
 
@@ -51,7 +62,7 @@ class Parser extends BaseParser<Object> {
                 NewLine(),
                 Step(stepVar),
                 ZeroOrMore(NewLine()),
-                policyVar.set(policyVar.get().addStep(stepVar.get()))
+                policyVar.set(policyVar.get().addStep(stepVar.get().getName(), stepVar.get()))
         );
     }
 
@@ -206,4 +217,10 @@ class Parser extends BaseParser<Object> {
     Rule NewLine() {
         return FirstOf('\n', Sequence('\r', Optional('\n')));
     }
+
+
+    Rule Whitespace() {
+        return AnyOf(" \t");
+    }
+
 }

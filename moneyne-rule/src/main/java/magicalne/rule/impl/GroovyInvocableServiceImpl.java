@@ -23,16 +23,15 @@ public class GroovyInvocableServiceImpl implements RuleService {
 
 
     @Override
-    public void compile(String filePath) {
-        Path path = Paths.get(filePath);
+    public void compile(Path path) {
         try {
             byte[] bytes = Files.readAllBytes(path);
             String content = new String(bytes, StandardCharsets.UTF_8);
             ENGINE.eval(content);
         } catch (IOException e) {
-            throw new RuleException("Read rule file failed. filePath is: " + filePath, e);
+            throw new RuleException("Read rule file failed. filePath is: " + path.toString(), e);
         } catch (ScriptException e) {
-            throw new RuleException("Compile rule failed. filePath is: " + filePath, e);
+            throw new RuleException("Compile rule failed. filePath is: " + path.toString(), e);
         }
     }
 

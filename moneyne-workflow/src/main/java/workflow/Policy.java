@@ -1,17 +1,27 @@
 package workflow;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Author: zehui.lv@dianrong on 6/15/17.
  */
 public class Policy {
+    private String namespace;
     private String policyId;
     private Step initStep;
-    private List<Step> steps;
+    private Map<String, Step> steps;
 
     public Policy() {
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public Policy setNamespace(String namespace) {
+        this.namespace = namespace;
+        return this;
     }
 
     public String getPolicyId() {
@@ -31,26 +41,27 @@ public class Policy {
         return this;
     }
 
-    public List<Step> getSteps() {
+    public Map<String, Step> getSteps() {
         return steps;
     }
 
-    public Policy addStep(Step step) {
+    public Policy addStep(String stepName, Step step) {
         if (this.steps == null) {
-            this.steps = new ArrayList<>();
+            this.steps = new HashMap<>();
         }
-        this.steps.add(step);
+        this.steps.put(stepName, step);
         return this;
     }
 
-    public void setSteps(List<Step> steps) {
+    public void setSteps(Map<String, Step> steps) {
         this.steps = steps;
     }
 
     @Override
     public String toString() {
         return "Policy{" +
-                "policyId='" + policyId + '\'' +
+                "namespace='" + namespace + '\'' +
+                ", policyId='" + policyId + '\'' +
                 ", initStep=" + initStep +
                 ", steps=" + steps +
                 '}';
