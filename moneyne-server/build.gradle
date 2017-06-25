@@ -1,0 +1,3 @@
+dependencies {
+    compile project(':moneyne-rule'), project(':moneyne-workflow'), project(':moneyne-thrift')
+}

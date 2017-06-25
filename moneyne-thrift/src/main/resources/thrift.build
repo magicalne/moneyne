@@ -1,0 +1,1 @@
+thrift -out /Users/magiclane/git/my/moneyne/moneyne-thrift/src/main/java --gen java /Users/magiclane/git/my/moneyne/moneyne-thrift/src/main/thrift/moneyne.thrift

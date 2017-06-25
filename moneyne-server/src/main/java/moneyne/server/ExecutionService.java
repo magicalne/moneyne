@@ -1,3 +1,5 @@
+package moneyne.server;
+
 import thrift.generated.PolicyExecutionReport;
 
 /**

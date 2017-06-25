@@ -1,3 +1,5 @@
+package moneyne.server;
+
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;

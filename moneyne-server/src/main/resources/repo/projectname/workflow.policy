@@ -1,0 +1,14 @@
+namespace projectname
+
+init:
+ruleSet = [age.groovy, city.groovy]
+mode = NORMAL
+pass -> blacklist
+reject -> goHomeKid
+undefine -> return
+
+step blacklist:
+ruleSet = [blacklist.groovy]
+
+step goHomeKid:
+ruleSet = [baby.groovy]

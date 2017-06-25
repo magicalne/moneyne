@@ -1,9 +1,5 @@
 namespace java thrift.generated
 
-enum Mode {
-    NORMAL
-}
-
 enum Result {
     PASS,
     UNDEFINE,
@@ -18,14 +14,14 @@ struct RuleResult {
 struct StepResult {
     1: string stepName,
     2: set<RuleResult> ruleResults
+    3: Result stepResult
 }
 
 struct PolicyExecutionReport {
     1: string policyName,
     2: string datetime,
     3: Result result,
-    4: Mode mode,
-    5: list<StepResult> steps
+    4: list<StepResult> steps
 }
 
 struct Person {

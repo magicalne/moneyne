@@ -1,3 +1,5 @@
+package moneyne.server;
+
 /**
  * Author: zehui.lv@dianrong on 6/22/17.
  */

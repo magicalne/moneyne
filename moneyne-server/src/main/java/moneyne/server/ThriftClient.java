@@ -1,3 +1,5 @@
+package moneyne.server;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -8,6 +10,7 @@ import org.apache.thrift.transport.TTransportException;
 import thrift.generated.MoneyneService;
 import thrift.generated.Person;
 import thrift.generated.PolicyExecutionReport;
+
 
 import java.nio.ByteBuffer;
 

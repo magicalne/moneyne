@@ -1,11 +1,9 @@
+package moneyne.server;
+
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import thrift.generated.Mode;
-import thrift.generated.MoneyneService;
-import thrift.generated.Person;
-import thrift.generated.PolicyExecutionReport;
-import thrift.generated.Result;
+import thrift.generated.*;
 
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
@@ -25,8 +23,8 @@ public class MoneyneServiceHandler implements MoneyneService.Iface {
             object.get(bytes, 0, bytes.length);
             deserializer.deserialize(person, bytes);
             System.out.println(person);
-            return new PolicyExecutionReport(policyName, LocalDateTime.now().toString(), Result.PASS, Mode.NORMAL,
-                                             Collections.emptyList());
+            return new PolicyExecutionReport(policyName, LocalDateTime.now().toString(), Result.PASS,
+                                            Collections.emptyList());
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
