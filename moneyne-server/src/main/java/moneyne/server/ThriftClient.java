@@ -1,5 +1,6 @@
 package moneyne.server;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.TException;
 import org.apache.thrift.TSerializer;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -11,12 +12,12 @@ import thrift.generated.MoneyneService;
 import thrift.generated.Person;
 import thrift.generated.PolicyExecutionReport;
 
-
 import java.nio.ByteBuffer;
 
 /**
- * Author: zehui.lv@dianrong on 6/22/17.
+ * Author:chandler on 6/22/17.
  */
+@Slf4j
 public class ThriftClient {
     public static void main(String[] args) {
         try {
@@ -27,15 +28,17 @@ public class ThriftClient {
             MoneyneService.Client client = new MoneyneService.Client(protocol);
 
             final String pong = client.ping();
-            System.out.println("ping：" + pong);
 
-            final Person person = new Person("chandler", 22, "shanghai", "12312312312321");
+            log.info("ping: ", pong);
+
+            final Person person = new Person("chandler", 24, "shanghai", "12312312312321");
             TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory() );
             final byte[] bytes = serializer.serialize(person);
-            final PolicyExecutionReport report = client.execute("workflow.policy",
+            final PolicyExecutionReport report = client.execute("workflow",
                                                                  ByteBuffer.wrap(bytes),
+                                                                 Person.class.getName(),
                                                                  person.getSsn());
-            System.out.println(report);
+            log.info("Response report: {}", report);
         } catch (TTransportException e) {
             e.printStackTrace();
         } catch (TException e) {

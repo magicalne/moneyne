@@ -31,7 +31,7 @@ struct Person {
     4: string ssn
 }
 service MoneyneService {
-    PolicyExecutionReport execute(1:string policyName, 2:binary object, 3:string id),
+    PolicyExecutionReport execute(1:string policyName, 2:binary object, 3:string clazzName, 4:string id),
 
     string ping()
 }

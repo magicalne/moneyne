@@ -1,5 +1,6 @@
 package moneyne.server;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TSimpleServer;
 import org.apache.thrift.transport.TServerSocket;
@@ -10,6 +11,7 @@ import thrift.generated.MoneyneService;
 /**
  * Author: zehui.lv@dianrong on 6/22/17.
  */
+@Slf4j
 public class ThriftServer {
     public static void main(String[] args) {
         try {
@@ -28,12 +30,12 @@ public class ThriftServer {
                 // Use this for a multithreaded server
                 // TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
 
-                System.out.println("Starting the simple server...");
+                log.info("Starting the simple server...");
                 server.serve();
             };
             new Thread(simpleServer).start();
         } catch (Exception e) {
-            System.err.println("Exception" + e);
+            log.error("Start thrift server with exception: ", e);
         }
     }
 }

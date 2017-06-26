@@ -111,7 +111,6 @@ public class ExecutionServiceImpl implements ExecutionService {
                 return executeWorkflow(object, step.getUndefineStep(), stepMap, stepResults, finalResult);
             case REJECT:
                 return executeWorkflow(object, step.getRejectStep(), stepMap, stepResults, finalResult);
-//            default: break;
             default: return Result.PASS;
         }
     }
