@@ -2,8 +2,11 @@ package moneyne.server;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import lombok.extern.slf4j.Slf4j;
+import magicalne.moneyne.VersionManager;
 import magicalne.rule.RuleService;
 import magicalne.rule.impl.GroovyInvocableServiceImpl;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import thrift.generated.PolicyExecutionReport;
 import thrift.generated.Result;
 import thrift.generated.RuleResult;
@@ -28,40 +31,43 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Author: zehui.lv@dianrong on 6/22/17.
  */
+@Slf4j
 public class ExecutionServiceImpl implements ExecutionService {
-    private static final String REPO_PATH = "/repo";
+    private static final String REPO_PATH_BASE = "/repo";
     private static final ConcurrentMap<String, Policy> POLICY_CONCURRENT_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, String> RULE_CONCURRENT_MAP = new ConcurrentHashMap<>();
     private static final RuleService GROOVY_INVOCABLE_SERVICE = new GroovyInvocableServiceImpl();
     private static final String RETURN = "return";
 
+    private static final String BRANCH_NAME = "dev";
+    private static final String REPO_PATH;
     /*
-     * Load files into memory.
+    Load files into memory.
      */
     static {
-        final URL repoUrl = ExecutionServiceImpl.class.getClass().getResource(REPO_PATH);
-        Preconditions.checkNotNull(repoUrl, "There is no repo!");
-        final String repoPath = repoUrl.getPath();
+        final URL repoUrl = ExecutionService.class.getResource(REPO_PATH_BASE);
+        REPO_PATH = repoUrl.getPath() + "/policy";
+        log.info("local repo path is: {}", REPO_PATH);
+        try {
+            VersionManager.INSTANCE.clone(REPO_PATH, BRANCH_NAME);
+        } catch (GitAPIException e) {
+            log.error("Clone repo to local exception. {}", e);
+        }
+        loadPolicyDir(REPO_PATH);
+
+    }
+
+    /**
+     * Load files to memory from repoPath.
+     * @param repoPath Under resources folder. Should be under "/repo" directory.
+     */
+    private static void loadPolicyDir(String repoPath) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(repoPath))) {
             for (Path projectPath: stream) {
-                if (Files.isDirectory(projectPath)) {
+                if (Files.isDirectory(projectPath) && !Files.isHidden(projectPath)) {
                     try (DirectoryStream<Path> projectStream = Files.newDirectoryStream(projectPath)) {
                         for (Path innerPath : projectStream) {
-                            String filename = innerPath.getFileName().toString();
-                            if (filename.endsWith(".policy")) {
-                                final Policy policy = DSLParseService.INSTANCE.policyParser(innerPath);
-                                Preconditions.checkNotNull(policy, "Policy cannot be null here");
-                                POLICY_CONCURRENT_MAP.put(policy.getPolicyId(), policy);
-                            } else if (filename.endsWith(".groovy")) {
-                                GROOVY_INVOCABLE_SERVICE.compile(innerPath);
-                                final byte[] bytes = Files.readAllBytes(innerPath);
-                                final String ruleContent = new String(bytes, StandardCharsets.UTF_8);
-                                final String ruleName = com.google.common.io.Files.getNameWithoutExtension(
-                                        filename);
-                                RULE_CONCURRENT_MAP.putIfAbsent(ruleName, ruleContent);
-                            } else {
-                                throw new UnknownFileTypeException(innerPath.toString());
-                            }
+                            loadFileToMemoryByType(innerPath);
                         }
                     }
                 }
@@ -69,7 +75,29 @@ public class ExecutionServiceImpl implements ExecutionService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private static void loadFileToMemoryByType(Path innerPath) throws IOException {
+        if (Files.isHidden(innerPath)) {
+            return ;
+        }
+        String filename = innerPath.getFileName().toString();
+        if (filename.endsWith(".policy")) {
+            final Policy policy = DSLParseService.INSTANCE.policyParser(innerPath);
+            Preconditions.checkNotNull(policy, "Policy cannot be null here");
+            POLICY_CONCURRENT_MAP.put(policy.getPolicyId(), policy);
+        } else if (filename.endsWith(".groovy")) {
+            GROOVY_INVOCABLE_SERVICE.compile(innerPath);
+            final byte[] bytes = Files.readAllBytes(innerPath);
+            final String ruleContent = new String(bytes, StandardCharsets.UTF_8);
+            final String ruleName = com.google.common.io.Files.getNameWithoutExtension(
+                    filename);
+            RULE_CONCURRENT_MAP.put(ruleName, ruleContent);
+        } else if (filename.endsWith("md")) {
+            //Ignore.
+        } else {
+            throw new UnknownFileTypeException(innerPath.toString());
+        }
     }
 
     /**
@@ -90,6 +118,25 @@ public class ExecutionServiceImpl implements ExecutionService {
         Result finalResult = initStepResult.getStepResult();
         finalResult = stepSwitch(object, stepResults, initStep, initStepResult, stepMap, finalResult);
         return new PolicyExecutionReport(policyName, LocalDateTime.now().toString(), finalResult, stepResults);
+    }
+
+    /**
+     * Publish changes from Policy repo.
+     * @return Added, modified and renamed file paths. Or empty list if there's exception.
+     */
+    @Override
+    public List<String> publish() {
+        try {
+            List<String> updatePath = VersionManager.INSTANCE.pull(REPO_PATH, BRANCH_NAME);
+            for (String pathName : updatePath) {
+
+                loadFileToMemoryByType(Paths.get(REPO_PATH + '/' + pathName));
+            }
+            return updatePath;
+        } catch (GitAPIException | IOException e) {
+            log.error("Pull with rebase from remote failed due to {}.", e);
+        }
+        return Collections.emptyList();
     }
 
     /**

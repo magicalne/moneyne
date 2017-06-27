@@ -33,5 +33,7 @@ struct Person {
 service MoneyneService {
     PolicyExecutionReport execute(1:string policyName, 2:binary object, 3:string clazzName, 4:string id),
 
+    list<string> publish(),
+
     string ping()
 }

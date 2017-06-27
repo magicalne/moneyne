@@ -2,9 +2,8 @@ package moneyne.server;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TSimpleServer;
-import org.apache.thrift.transport.TServerSocket;
-import org.apache.thrift.transport.TServerTransport;
+import org.apache.thrift.server.TThreadedSelectorServer;
+import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import thrift.generated.MoneyneService;
 
@@ -19,16 +18,15 @@ public class ThriftServer {
             final MoneyneService.Processor<MoneyneServiceHandler> processor = new MoneyneService.Processor<>(handler);
 
             Runnable simpleServer = () -> {
-                TServerTransport serverTransport = null;
+                TNonblockingServerSocket serverTransport = null;
                 try {
-                    serverTransport = new TServerSocket(9090);
+                    serverTransport = new TNonblockingServerSocket(9090);
                 } catch (TTransportException e) {
                     e.printStackTrace();
                 }
-                TServer server = new TSimpleServer(new TServer.Args(serverTransport).processor(processor));
-
-                // Use this for a multithreaded server
-                // TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
+                TThreadedSelectorServer.Args thriftArgs = new TThreadedSelectorServer.Args(serverTransport);
+                thriftArgs.workerThreads(200);
+                TServer server = new TThreadedSelectorServer(thriftArgs.processor(processor));
 
                 log.info("Starting the simple server...");
                 server.serve();

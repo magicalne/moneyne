@@ -5,4 +5,5 @@ include 'moneyne-rule'
 include 'moneyne-workflow'
 include 'moneyne-thrift'
 include 'moneyne-server'
+include 'moneyne-jgit'
 

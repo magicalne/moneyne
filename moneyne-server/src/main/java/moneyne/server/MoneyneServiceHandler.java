@@ -9,17 +9,16 @@ import thrift.generated.*;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Author: zehui.lv@dianrong on 6/22/17.
  */
 public class MoneyneServiceHandler implements MoneyneService.Iface {
-
-
+    private final ExecutionService executionService = new ExecutionServiceImpl();
     @Override
     public PolicyExecutionReport execute(String policyName, ByteBuffer object, String className, String id)
             throws TException {
-        final ExecutionService executionService = new ExecutionServiceImpl();
 
         TDeserializer deserializer = new TDeserializer(new TBinaryProtocol.Factory() );
         try {
@@ -34,6 +33,11 @@ public class MoneyneServiceHandler implements MoneyneService.Iface {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<String> publish() throws TException {
+        return executionService.publish();
     }
 
     @Override
