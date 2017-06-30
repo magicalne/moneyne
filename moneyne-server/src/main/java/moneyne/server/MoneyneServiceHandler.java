@@ -1,5 +1,7 @@
 package moneyne.server;
 
+import lombok.extern.slf4j.Slf4j;
+import moneyne.server.exception.MonenyeExecutionException;
 import org.apache.thrift.TBase;
 import org.apache.thrift.TDeserializer;
 import org.apache.thrift.TException;
@@ -7,13 +9,12 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import thrift.generated.*;
 
 import java.nio.ByteBuffer;
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Author: zehui.lv@dianrong on 6/22/17.
  */
+@Slf4j
 public class MoneyneServiceHandler implements MoneyneService.Iface {
     private final ExecutionService executionService = new ExecutionServiceImpl();
     @Override
@@ -27,12 +28,12 @@ public class MoneyneServiceHandler implements MoneyneService.Iface {
             final byte[] bytes = new byte[object.remaining()];
             object.get(bytes, 0, bytes.length);
             deserializer.deserialize(instance, bytes);
-            System.out.println(instance);
             return executionService.execute(policyName, instance, id);
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException |
+                ClassNotFoundException | MonenyeExecutionException e) {
+            log.info("Something wrong when handle service. {}", e);
+            throw new TException(e);
         }
-        return null;
     }
 
     @Override

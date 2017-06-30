@@ -113,16 +113,29 @@ class PolicyParser extends BaseParser<Object> {
     }
 
     Rule Element(Var<Step> stepVar) {
+        Var<RuleElement> ruleElementVar = new Var<>(new RuleElement());
         return Sequence(
-                ZeroOrMore(Spacing()),
+                ZeroOrMore(Whitespace()),
                 OneOrMore(
                         TestNot(Ch('[')),
                         TestNot(Ch(']')),
-                        TestNot(Spacing()),
+                        TestNot(Whitespace()),
                         TestNot(CommaChar()),
                         ANY),
-                stepVar.set(stepVar.get().addRule(match())),
-                ZeroOrMore(Spacing())
+                ruleElementVar.set(ruleElementVar.get().setRuleName(match())),
+                ZeroOrMore(Whitespace()),
+                Optional(Sequence(
+                        ColonChar(),
+                        ZeroOrMore(Whitespace()),
+                        OneOrMore(
+                                TestNot(Whitespace()),
+                                TestNot(Ch(']')),
+                                TestNot(CommaChar()),
+                                ANY
+                                ),
+                        ruleElementVar.set(ruleElementVar.get().setDependOn(match()))
+                )),
+                stepVar.set(stepVar.get().addRule(ruleElementVar.get()))
         );
     }
 

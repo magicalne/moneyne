@@ -1,14 +1,14 @@
 namespace test
 
 init:
-ruleSet = [ test.groovy   , a, a  , fasd      ,      123]
+ruleSet = [ test.groovy  , a, a  , fasd      ,      123]
 mode = NORMAL
 pass -> one
 reject -> return
 undefine -> return
 
 step one:
-ruleSet = [ahaha.groovy, adfa, a,f,af,ad,fa, fff]
+ruleSet = [ahaha.groovy : getSMSsByMobile, adfa, a,f,af,ad,fa, fff]
 
 step two:
 ruleSet = [a,d,a,d]

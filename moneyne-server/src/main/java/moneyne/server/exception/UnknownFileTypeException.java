@@ -1,4 +1,4 @@
-package moneyne.server;
+package moneyne.server.exception;
 
 /**
  * Author: zehui.lv@dianrong on 6/22/17.

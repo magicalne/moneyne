@@ -18,7 +18,7 @@ public enum DSLParseService {
     DSLParseService() {
     }
 
-    final PolicyParser POLICY_PARSER = Parboiled.createParser(PolicyParser.class);
+    private static final PolicyParser POLICY_PARSER = Parboiled.createParser(PolicyParser.class);
 
     public Policy policyParser(Path path) throws IOException {
         final byte[] bytes = Files.readAllBytes(path);

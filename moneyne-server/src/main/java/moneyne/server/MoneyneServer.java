@@ -11,7 +11,7 @@ import thrift.generated.MoneyneService;
  * Author: zehui.lv@dianrong on 6/22/17.
  */
 @Slf4j
-public class ThriftServer {
+public class MoneyneServer {
     public static void main(String[] args) {
         try {
             final MoneyneServiceHandler handler = new MoneyneServiceHandler();

@@ -8,7 +8,7 @@ import java.util.Set;
  */
 public class Step {
     private String name;
-    private Set<String> ruleSet;
+    private Set<RuleElement> ruleSet;
     private Mode mode;
     private String passStep;
     private String rejectStep;
@@ -17,16 +17,16 @@ public class Step {
     public Step() {
     }
 
-    public Set<String> getRuleSet() {
+    public Set<RuleElement> getRuleSet() {
         return ruleSet;
     }
 
-    public Step setRuleSet(Set<String> ruleSet) {
+    public Step setRuleSet(Set<RuleElement> ruleSet) {
         this.ruleSet = ruleSet;
         return this;
     }
 
-    public Step addRule(String rule) {
+    public Step addRule(RuleElement rule) {
         if (this.ruleSet == null) {
             ruleSet = new HashSet<>();
         }

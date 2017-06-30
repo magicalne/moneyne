@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
  * Created by magiclane on 20/06/2017.
@@ -36,12 +36,12 @@ public class GroovyInvocableServiceImpl implements RuleService {
     }
 
     @Override
-    public Object execute(String functionName, Object argument) {
+    public Object execute(String functionName, Object... arguments) {
         try {
-            return INVOCABLE.invokeFunction(functionName, argument);
+            return INVOCABLE.invokeFunction(functionName, arguments);
         } catch (ScriptException e) {
             throw new RuleException("Execute rule function failed, functionName: " +functionName +
-                    " argument: " + argument, e);
+                    " arguments: " + Arrays.toString(arguments), e);
         } catch (NoSuchMethodException e) {
             throw new RuleException("No such method:" + functionName, e);
         }

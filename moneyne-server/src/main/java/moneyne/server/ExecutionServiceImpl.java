@@ -6,17 +6,18 @@ import lombok.extern.slf4j.Slf4j;
 import magicalne.moneyne.VersionManager;
 import magicalne.rule.RuleService;
 import magicalne.rule.impl.GroovyInvocableServiceImpl;
+import moneyne.server.exception.UnknownFileTypeException;
+import moneyne.server.exception.UnknownMethodNameException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import thrift.generated.PolicyExecutionReport;
 import thrift.generated.Result;
 import thrift.generated.RuleResult;
 import thrift.generated.StepResult;
-import workflow.DSLParseService;
-import workflow.Mode;
-import workflow.Policy;
-import workflow.Step;
+import workflow.*;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -197,13 +198,17 @@ public class ExecutionServiceImpl implements ExecutionService {
         Preconditions.checkNotNull(object);
 
         if (step.getMode() == null || step.getMode() == Mode.NORMAL) {
-            Set<String> ruleSet = step.getRuleSet();
+            Set<RuleElement> ruleSet = step.getRuleSet();
             final Set<RuleResult> ruleResultSet = new HashSet<>(ruleSet.size() / 3 * 4);
             Result finalResult = Result.PASS;
-            for (String ruleName : ruleSet) {
-                String functionName = com.google.common.io.Files.getNameWithoutExtension(ruleName);
+            for (RuleElement rule : ruleSet) {
+                String dependOn = rule.getDependOn();
+                if (!Strings.isNullOrEmpty(dependOn)) {
+                    Object remoteData = fetchDependencyData(object, dependOn);
+                }
+                String functionName = com.google.common.io.Files.getNameWithoutExtension(rule.getRuleName());
                 Result presentResult = (Result) GROOVY_INVOCABLE_SERVICE.execute(functionName, object);
-                RuleResult ruleResult = new RuleResult(ruleName, presentResult);
+                RuleResult ruleResult = new RuleResult(rule.getRuleName(), presentResult);
                 ruleResultSet.add(ruleResult);
                 finalResult = setFinalResult(presentResult, finalResult);
             }
@@ -211,6 +216,29 @@ public class ExecutionServiceImpl implements ExecutionService {
         }
 
         throw new MoneyneExecutionException("Unknown mode type.");
+    }
+
+    private Object fetchDependencyData(Object object, String dependOn) {
+
+        String by = "By";
+        String[] split = dependOn.split(by);
+        Preconditions.checkState(split.length == 2);
+        String reqMethod = split[0];
+        String andStr = "And";
+        String[] parameters = split[1].split(andStr);
+        Preconditions.checkState(parameters.length > 0);
+
+        final List<Object> parameterList = new LinkedList<>();
+        try {
+            for (String parameter : parameters) {
+                Method method = object.getClass().getDeclaredMethod("get" + parameter);
+                Object result = method.invoke(object);
+                parameterList.add(result);
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new UnknownMethodNameException("Reflection exception when extract parameters.", e);
+        }
+        return InternalHttpClient.getResponse(reqMethod, parameterList);
     }
 
     /**

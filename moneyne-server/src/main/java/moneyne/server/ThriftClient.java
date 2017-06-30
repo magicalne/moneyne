@@ -34,7 +34,7 @@ public class ThriftClient {
 
             log.info("ping: ", pong);
 
-            final Person person = new Person("chandler", 24, "shanghai", "12312312312321");
+            final Person person = new Person("chandler", 24, "shanghai", "12312312312321", "13012341234");
             TSerializer serializer = new TSerializer(new TBinaryProtocol.Factory() );
             final byte[] bytes = serializer.serialize(person);
             final PolicyExecutionReport report = client.execute("workflow",

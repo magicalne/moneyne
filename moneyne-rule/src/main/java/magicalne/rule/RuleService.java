@@ -7,5 +7,5 @@ import java.nio.file.Path;
  */
 public interface RuleService {
     void compile(Path rulePath);
-    Object execute(String functionName, Object argument);
+    Object execute(String functionName, Object... argument);
 }
